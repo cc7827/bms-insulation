@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>从绝缘到漏电 · 第5页动画</title>
+<style>
+  html,body{margin:0;padding:0;background:#05080E;overflow:hidden}
+  #stage{position:relative;width:1920px;height:1080px;overflow:hidden;
+    font-family:"Microsoft YaHei","微软雅黑","Segoe UI",sans-serif;
+    background:radial-gradient(1250px 820px at 40% 48%, #10223A 0%, #0A1420 48%, #05080E 100%);}
+  .kicker{position:absolute;left:96px;top:56px;color:#4E6C7C;font-size:23px;letter-spacing:6px}
+  .kicker b{color:#2BE08A;font-weight:600;letter-spacing:2px}
+  #capWrap{position:absolute;left:0;right:0;top:944px;height:72px;text-align:center}
+  .cap{position:absolute;left:0;right:0;top:0;font-size:41px;color:#DCEBF3;letter-spacing:1px;opacity:0}
+  .cap em{font-style:normal;color:#FFB020;font-weight:700}
+  .cap i{font-style:normal;color:#2BE08A;font-weight:700}
+
+  /* ===== 交互控制条 ===== */
+  #ui{position:absolute;left:30px;top:992px;width:660px;box-sizing:border-box;
+      display:flex;align-items:center;gap:9px;padding:9px 13px 17px;
+      border-radius:14px;background:rgba(7,14,21,.86);
+      border:1px solid rgba(110,170,192,.34);backdrop-filter:blur(7px);
+      box-shadow:0 12px 34px rgba(0,0,0,.5)}
+  #ui button{appearance:none;border-radius:10px;cursor:pointer;font-family:inherit;
+      font-size:19px;letter-spacing:1px;padding:9px 0;transition:all .16s ease;
+      outline:none;white-space:nowrap;flex:none}
+  #bPlay{width:128px;color:#9FF3EA;background:rgba(53,224,208,.14);border:1px solid #35E0D0}
+  #bPlay:hover{background:rgba(53,224,208,.28)}
+  #bPlay.on{background:#35E0D0;color:#042A2A;border-color:#35E0D0}
+  #bPrev{width:106px;color:#B7D2E0;background:rgba(120,165,190,.10);border:1px solid rgba(140,185,205,.45)}
+  #bPrev:hover{background:rgba(120,165,190,.22)}
+  #bStep{width:96px;color:#FFD79A;background:rgba(255,176,32,.13);border:1px solid #FFB020}
+  #bStep:hover{background:rgba(255,176,32,.26)}
+  #bReset{width:118px;color:#B7D2E0;background:rgba(120,165,190,.10);border:1px solid rgba(140,185,205,.45)}
+  #bReset:hover{background:rgba(120,165,190,.22)}
+  #ui button:disabled{opacity:.34;cursor:not-allowed}
+  #cnt{flex:1;text-align:right;color:#7FA3B6;font-size:16px;letter-spacing:.5px;
+      line-height:1.25;white-space:nowrap}
+  #cnt b{color:#CFE7F2;font-weight:600}
+  #cnt i{color:#6E92A4;font-style:normal;font-size:14px;margin-left:8px}
+  #prog{position:absolute;left:13px;right:13px;bottom:7px;height:3px;
+      background:rgba(120,170,190,.16);border-radius:2px;overflow:hidden}
+  #prog i{display:block;height:100%;width:0%;border-radius:2px;
+      background:linear-gradient(90deg,#35E0D0,#FFB020);transition:width .12s linear}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kicker">BMS 绝缘检测 · 不平衡电桥 <b>从「绝缘」到「漏电」</b></div>
+
+  <svg id="art" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gLiquid" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#E4F53F"/><stop offset="55%" stop-color="#BEE51C"/>
+        <stop offset="100%" stop-color="#8CC014"/>
+      </linearGradient>
+      <linearGradient id="gFace" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8FB6CE" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="#5C8AA6" stop-opacity="0.09"/>
+      </linearGradient>
+      <linearGradient id="gCell" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2A4A63"/><stop offset="100%" stop-color="#16303F"/>
+      </linearGradient>
+      <radialGradient id="gGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#16D0D6" stop-opacity="0.28"/>
+        <stop offset="100%" stop-color="#16D0D6" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="fSoft" x="-70%" y="-70%" width="240%" height="240%">
+        <feGaussianBlur stdDeviation="16"/>
+      </filter>
+      <filter id="fGlow" x="-70%" y="-70%" width="240%" height="240%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <pattern id="pGrid" width="48" height="48" patternUnits="userSpaceOnUse">
+        <path d="M48 0H0V48" stroke="#1B3348" stroke-width="1" opacity="0.5"/>
+      </pattern>
+    </defs>
+
+    <rect x="0" y="0" width="1920" height="1080" fill="url(#pGrid)" opacity="0.55"/>
+    <ellipse id="glowPack" cx="520" cy="500" rx="520" ry="380" fill="url(#gGlow)" opacity="0"/>
+    <ellipse id="glowGauge" cx="1720" cy="560" rx="300" ry="280" fill="url(#gGlow)" opacity="0"/>
+
+    <!-- ================= 左：电池包 ================= -->
+    <g id="pack" opacity="0">
+      <path d="M120 300 L200 240 L1010 240 L930 300 Z" fill="#7FA8C9" opacity="0.09"/>
+      <path d="M930 300 L1010 240 L1010 640 L930 700 Z" fill="#7FA8C9" opacity="0.06"/>
+      <rect x="120" y="300" width="810" height="400" rx="14" fill="url(#gFace)"/>
+      <g stroke="#7FB4D6" stroke-width="2.2" fill="none" opacity="0.7">
+        <path d="M120 300 L200 240 L1010 240 L930 300 Z"/>
+        <path d="M930 300 L1010 240 L1010 640 L930 700 Z"/>
+        <rect x="120" y="300" width="810" height="400" rx="14"/>
+      </g>
+      <text x="118" y="220" fill="#4E6C7C" font-size="21" letter-spacing="5">电池包 剖面</text>
+
+      <g id="cells"></g>
+
+      <!-- 主正 -->
+      <path id="busPLine" d="M180 352 H880" stroke="#FF4A3D" stroke-width="7" stroke-linecap="round"
+            pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+      <circle id="busPdot" cx="180" cy="352" r="8.5" fill="#FF4A3D"/>
+      <text id="busPlab" x="186" y="336" fill="#FF7A70" font-size="24" font-weight="700">主正 U+</text>
+
+      <!-- 主负 -->
+      <path id="busNLine" d="M180 612 H880" stroke="#FF4A3D" stroke-width="7" stroke-linecap="round"
+            pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+      <circle id="busNdot" cx="180" cy="612" r="8.5" fill="#FF4A3D"/>
+      <text id="busNlab" x="186" y="648" fill="#FF7A70" font-size="24" font-weight="700">主负 U−</text>
+
+      <!-- 壳体（地） -->
+      <path id="gndLine" d="M120 700 H930" stroke="#2BE08A" stroke-width="8" stroke-linecap="round"
+            pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+      <g id="gndSym" opacity="0">
+        <path d="M104 700 v24 M86 724 h36 M94 733 h20 M101 742 h6" stroke="#2BE08A" stroke-width="3.2" stroke-linecap="round"/>
+      </g>
+      <text id="gndLab" x="118" y="772" fill="#2BE08A" font-size="26" font-weight="700" opacity="0">壳体（车身）= 地</text>
+
+      <!-- 高阻绝缘 -->
+      <g id="dashP">
+        <path d="M400 362 V692" stroke="#7FA9BE" stroke-width="3.4" stroke-dasharray="13 11" stroke-linecap="round"/>
+      </g>
+      <g id="dashN" opacity="0">
+        <path d="M860 622 V692" stroke="#7FA9BE" stroke-width="3.4" stroke-dasharray="13 11" stroke-linecap="round"/>
+      </g>
+      <g id="chipIns" opacity="0">
+        <rect x="268" y="398" width="124" height="44" rx="22" fill="#12283A" stroke="#3E6B82"/>
+        <text x="330" y="428" fill="#9CC3D6" font-size="22" text-anchor="middle">高阻 ∞</text>
+      </g>
+
+      <!-- 电解液 -->
+      <path id="liqTongue" d="" fill="url(#gLiquid)" opacity="0"/>
+      <ellipse id="liqPool" cx="400" cy="694" rx="10" ry="3" fill="url(#gLiquid)" opacity="0"/>
+      <g id="drops" opacity="0">
+        <ellipse id="d1" cx="386" cy="612" rx="9" ry="15" fill="#CFEA2E"/>
+        <ellipse id="d2" cx="418" cy="600" rx="7" ry="11" fill="#BFE01F"/>
+      </g>
+      <circle id="flash" cx="400" cy="694" r="10" fill="none" stroke="#FFF7A0" stroke-width="5" opacity="0"/>
+
+      <!-- 漏电通路 -->
+      <g id="leakPath" opacity="0">
+        <path d="M400 694 V366" stroke="#FF3B2F" stroke-width="18" stroke-linecap="round" opacity="0.32" filter="url(#fSoft)"/>
+        <path d="M400 694 V366" stroke="#FF4A3D" stroke-width="6.5" stroke-linecap="round"/>
+        <path id="leakFlow" d="M400 368 V692" stroke="#FFE2DD" stroke-width="3.2" stroke-linecap="round"
+              stroke-dasharray="15 30" stroke-dashoffset="0" stroke-opacity="0.6"/>
+      </g>
+      <g id="chipLeak" opacity="0">
+        <rect x="416" y="396" width="198" height="48" rx="24" fill="#2A0F0C" stroke="#FF6A5E"/>
+        <text x="515" y="428" fill="#FFB4AC" font-size="25" font-weight="700" text-anchor="middle">R泄 40 kΩ</text>
+      </g>
+    </g>
+
+    <rect id="dimL" x="0" y="0" width="1060" height="1080" fill="#05080E" opacity="0"/>
+
+    <!-- ================= 右：测量链 ================= -->
+    <g id="right" opacity="0">
+      <text x="1100" y="188" fill="#5C7C8C" font-size="22" letter-spacing="5">BMS 测量电路</text>
+
+      <g stroke="#6E93A8" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.92">
+        <path d="M1250 232 V286"/>
+        <path d="M1250 386 V452"/>
+        <path d="M1250 524 V596"/>
+        <path d="M1250 668 V704"/>
+      </g>
+      <text x="1214" y="242" fill="#FF7A70" font-size="23" font-weight="700" text-anchor="end">U+</text>
+      <text x="1250" y="736" fill="#FF7A70" font-size="23" font-weight="700" text-anchor="middle">U−</text>
+
+      <g id="r1g">
+        <rect id="r1box" x="1218" y="286" width="64" height="100" rx="9"
+              fill="#16303F" stroke="#8FB6CE" stroke-width="2.6"/>
+      </g>
+      <text id="r1a" x="1204" y="344" fill="#C7DCE8" font-size="25" font-weight="700" text-anchor="end">R1 300 kΩ</text>
+
+      <rect x="1218" y="452" width="64" height="72" rx="9" fill="#16303F" stroke="#8FB6CE" stroke-width="2.6"/>
+      <text x="1204" y="496" fill="#C7DCE8" font-size="25" text-anchor="end">R2 100 kΩ</text>
+
+      <rect x="1218" y="596" width="64" height="72" rx="9" fill="#16303F" stroke="#8FB6CE" stroke-width="2.6"/>
+      <text x="1204" y="640" fill="#C7DCE8" font-size="25" text-anchor="end">R3 100 kΩ</text>
+
+      <!-- 壳体节点 -->
+      <g id="chassis">
+        <path d="M1250 420 H1168" stroke="#2BE08A" stroke-width="4" stroke-linecap="round"/>
+        <path d="M1150 420 v22 M1132 442 h36 M1140 451 h20" stroke="#2BE08A" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="1250" cy="420" r="8" fill="#2BE08A"/>
+        <text x="1130" y="408" fill="#2BE08A" font-size="17">地</text>
+      </g>
+
+      <!-- R泄 并联 -->
+      <g id="rLeak" opacity="0">
+        <path d="M1250 250 H1420 V300 M1420 410 V420 H1250" stroke="#FF4A3D" stroke-width="4.4"
+              stroke-linecap="round" fill="none"/>
+        <rect x="1388" y="300" width="64" height="110" rx="9" fill="#2A0F0C" stroke="#FF6A5E" stroke-width="3"/>
+        <text x="1470" y="342" fill="#FFB4AC" font-size="24" font-weight="700">R泄</text>
+        <text x="1470" y="374" fill="#FF8A80" font-size="21">40 kΩ</text>
+        <text x="1388" y="470" fill="#8FA9B8" font-size="19">与 R1 并联</text>
+      </g>
+
+      <!-- V0 -->
+      <circle id="v0dot" cx="1250" cy="560" r="9" fill="#16D0D6"/>
+      <path id="v0wire" d="M1250 560 H1590" stroke="#16D0D6" stroke-width="3.6" fill="none"
+            stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+      <g id="v0chip" opacity="0">
+        <rect x="1152" y="540" width="76" height="40" rx="20" fill="#0B2A33" stroke="#16D0D6"/>
+        <text x="1190" y="568" fill="#16D0D6" font-size="23" font-weight="700" text-anchor="middle">V0</text>
+      </g>
+
+      <!-- 读数 -->
+      <g id="readout" opacity="0">
+        <rect x="1592" y="266" width="300" height="92" rx="14" fill="#0B1C28" stroke="#24506A"/>
+        <text x="1742" y="306" fill="#6E93A8" font-size="19" text-anchor="middle" letter-spacing="4">监测点电压 V0</text>
+        <text id="rdVal" x="1742" y="342" fill="#FFFFFF" font-size="40" font-weight="700"
+              text-anchor="middle" font-family="Consolas,monospace">80.0 V</text>
+      </g>
+
+      <!-- 表盘 -->
+      <g id="gauge" opacity="0">
+        <circle cx="1742" cy="560" r="152" fill="#0A1722" stroke="#1F3C4E" stroke-width="2"/>
+        <circle cx="1742" cy="560" r="142" fill="none" stroke="#12293A" stroke-width="1.2"/>
+        <path id="arcTrack" fill="none" stroke="#22414F" stroke-width="13" stroke-linecap="round"/>
+        <path id="arcAlarm" fill="none" stroke="#FF4A3D" stroke-width="13" stroke-linecap="round" opacity="0.5"/>
+        <g id="ticks"></g>
+        <path id="needleP" d="M1742 560 L1742 560" stroke="#FF4A3D" stroke-width="5.5" stroke-linecap="round"/>
+        <circle cx="1742" cy="560" r="11" fill="#0E2230" stroke="#8FB6CE" stroke-width="3"/>
+        <text x="1742" y="742" fill="#5C7C8C" font-size="19" text-anchor="middle" letter-spacing="3">0 — 200 V</text>
+      </g>
+    </g>
+
+    <!-- 收尾 -->
+    <rect id="veil" x="0" y="0" width="1920" height="1080" fill="#05080E" opacity="0"/>
+    <text id="bigA" x="960" y="474" fill="#9FD9E8" font-size="60" text-anchor="middle"
+          letter-spacing="6" opacity="0" font-weight="300">看不见的电阻</text>
+    <g id="bigArrow" opacity="0">
+      <path id="arShaft" d="M960 558 H960" stroke="#FFB020" stroke-width="6" stroke-linecap="round"/>
+      <path id="arHead" d="M960 558 l-16 -12 M960 558 l-16 12" stroke="#FFB020" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <text id="bigB" x="960" y="652" fill="#FFFFFF" font-size="78" text-anchor="middle"
+          letter-spacing="4" opacity="0" font-weight="700">看得见的电压 <tspan fill="#2BE08A">V0</tspan></text>
+    <text id="bigC" x="960" y="736" fill="#8CAAB8" font-size="24" text-anchor="middle"
+          letter-spacing="5" opacity="0">绝 缘 电 阻 ｜ 无 法 直 接 测 量 ｜ 只 能 换 算 成 电 压</text>
+  </svg>
+
+  <div id="capWrap">
+    <div class="cap" id="c1">绝缘正常：母线与壳体之间，<i>本该高阻不通</i></div>
+    <div class="cap" id="c2">电解液漏到底部、碰到壳体 —— 多了一条<i>导电通路</i></div>
+    <div class="cap" id="c3">BMS 在壳体上取一个电压 <em>V0</em>，用电压反推电阻</div>
+    <div class="cap" id="c4">R1 被 R泄 并联 → 上臂变小 → <em>V0 往高处偏 = 主正漏电</em></div>
+  </div>
+
+  <div id="ui">
+    <button id="bPlay">▶ 一键播放</button>
+    <button id="bPrev">◀ 上一步</button>
+    <button id="bStep">▷ 动作</button>
+    <button id="bReset">⟲ 一键复原</button>
+    <span id="cnt"><b>00</b>/10<i>· 待开始</i></span>
+    <div id="prog"><i></i></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const clamp=(x,a=0,b=1)=>x<a?a:(x>b?b:x);
+  const seg=(t,t0,t1)=>clamp((t-t0)/(t1-t0));
+  const eOut=p=>1-Math.pow(1-p,3);
+  const eInOut=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+  const lerp=(a,b,p)=>a+(b-a)*p;
+  const NS="http://www.w3.org/2000/svg";
+
+  // ---- 电芯（第 2 节为鼓包电芯，x 348..452）----
+  const cellsG=$("cells"); const cells=[];
+  for(let i=0;i<6;i++){
+    const x=232+i*116, w=104, y=460, h=140;
+    const r=document.createElementNS(NS,"rect");
+    r.setAttribute("x",x);r.setAttribute("y",y);r.setAttribute("width",w);r.setAttribute("height",h);
+    r.setAttribute("rx",10);r.setAttribute("fill","url(#gCell)");
+    r.setAttribute("stroke","#3E6B82");r.setAttribute("stroke-width",2);
+    const cap=document.createElementNS(NS,"rect");
+    cap.setAttribute("x",x+9);cap.setAttribute("y",y+9);cap.setAttribute("width",w-18);
+    cap.setAttribute("height",9);cap.setAttribute("rx",4);cap.setAttribute("fill","#4E7E96");
+    cellsG.appendChild(r);cellsG.appendChild(cap);
+    cells.push({r,x,y,w,h});
+  }
+
+  // ---- 表盘 ----
+  const CX=1742, CY=560, R=142;
+  const ang=v=>(210-1.2*v)*Math.PI/180;
+  const pt=(v,rad)=>[CX+rad*Math.cos(ang(v)), CY-rad*Math.sin(ang(v))];
+  function arcPath(v0,v1,rad){
+    let d="";const n=70;
+    for(let i=0;i<=n;i++){const v=v0+(v1-v0)*i/n,p=pt(v,rad);d+=(i?" L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1);}
+    return d;
+  }
+  $("arcTrack").setAttribute("d",arcPath(0,200,R));
+  $("arcAlarm").setAttribute("d",arcPath(170,200,R));
+  const ticksG=$("ticks");
+  for(let v=0;v<=200;v+=20){
+    const major=(v%40===0);
+    const a=pt(v,R-12),b=pt(v,R-12-(major?19:10));
+    const l=document.createElementNS(NS,"line");
+    l.setAttribute("x1",a[0]);l.setAttribute("y1",a[1]);l.setAttribute("x2",b[0]);l.setAttribute("y2",b[1]);
+    l.setAttribute("stroke",v>=170?"#FF4A3D":"#5E879C");
+    l.setAttribute("stroke-width",major?3:2);l.setAttribute("stroke-linecap","round");
+    ticksG.appendChild(l);
+    if(major){
+      const p=pt(v,R-44);
+      const t=document.createElementNS(NS,"text");
+      t.setAttribute("x",p[0]);t.setAttribute("y",p[1]+7);
+      t.setAttribute("fill",v>=160?"#FF8A80":"#7FA0B2");
+      t.setAttribute("font-size",v===80?"25":"20");
+      t.setAttribute("font-weight",v===80?"700":"400");
+      t.setAttribute("text-anchor","middle");t.textContent=v;ticksG.appendChild(t);
+    }
+  }
+  (function(){
+    const p0=pt(80,R+2),p1=pt(80,R+20);
+    const l=document.createElementNS(NS,"line");
+    l.setAttribute("x1",p0[0]);l.setAttribute("y1",p0[1]);l.setAttribute("x2",p1[0]);l.setAttribute("y2",p1[1]);
+    l.setAttribute("stroke","#2BE08A");l.setAttribute("stroke-width",4);l.setAttribute("stroke-linecap","round");
+    ticksG.appendChild(l);
+  })();
+  function setNeedle(v){
+    const p=pt(v,R-58);
+    $("needleP").setAttribute("d",`M${CX} ${CY} L${p[0].toFixed(1)} ${p[1].toFixed(1)}`);
+  }
+
+  // 液体的“舌”形路径
+  function tongue(p){
+    const top=600, y=lerp(top,688,p), w=lerp(15,44,p);
+    const cx=400;
+    return `M${cx-w} ${top}`
+      + ` C${cx-w-10} ${top+(y-top)*0.45}, ${cx-w*0.86} ${y-18}, ${cx-w*0.5} ${y}`
+      + ` A${w*0.5} ${w*0.34} 0 0 1 ${cx+w*0.5} ${y}`
+      + ` C${cx+w*0.86} ${y-18}, ${cx+w+10} ${top+(y-top)*0.45}, ${cx+w} ${top} Z`;
+  }
+
+  window.__seek=function(ms){
+    const t=ms/1000;
+
+    $("glowPack").setAttribute("opacity",(0.95*eOut(seg(t,0.2,1.6))).toFixed(3));
+    $("glowGauge").setAttribute("opacity",(0.95*eOut(seg(t,6.0,7.2))).toFixed(3));
+
+    const pIn=eOut(seg(t,0,1.0));
+    $("pack").setAttribute("opacity",pIn.toFixed(3));
+    $("pack").setAttribute("transform",`translate(0 ${((1-pIn)*24).toFixed(1)})`);
+
+    const dP=eInOut(seg(t,0.8,1.5));
+    $("busPLine").setAttribute("stroke-dashoffset",(1-dP).toFixed(3));
+    $("busPdot").setAttribute("opacity",seg(t,1.25,1.55));
+    $("busPlab").setAttribute("opacity",seg(t,1.25,1.65));
+
+    const dN=eInOut(seg(t,1.0,1.7));
+    $("busNLine").setAttribute("stroke-dashoffset",(1-dN).toFixed(3));
+    $("busNdot").setAttribute("opacity",seg(t,1.45,1.75));
+    $("busNlab").setAttribute("opacity",seg(t,1.45,1.85));
+
+    const dG=eInOut(seg(t,1.3,2.0));
+    $("gndLine").setAttribute("stroke-dashoffset",(1-dG).toFixed(3));
+    $("gndSym").setAttribute("opacity",seg(t,1.95,2.35));
+    $("gndLab").setAttribute("opacity",seg(t,2.05,2.55));
+
+    const dashOn=seg(t,2.2,2.8);
+    $("dashP").setAttribute("opacity",dashOn);
+    $("dashN").setAttribute("opacity",seg(t,2.4,3.0));
+    $("chipIns").setAttribute("opacity",seg(t,2.55,2.95));
+    $("c1").style.opacity=(seg(t,2.3,2.85)*(1-seg(t,4.0,4.5))).toFixed(3);
+
+    // 电解液
+    const lq=eInOut(seg(t,3.15,4.35));
+    $("liqTongue").setAttribute("d",tongue(lq));
+    $("liqTongue").setAttribute("opacity",lq>0.02?0.95:0);
+    const pool=eOut(seg(t,3.9,4.75));
+    $("liqPool").setAttribute("rx",(12+170*pool).toFixed(1));
+    $("liqPool").setAttribute("ry",(3+9*pool).toFixed(1));
+    $("liqPool").setAttribute("opacity",pool>0.02?0.9:0);
+
+    // 鼓包电芯
+    const bl=eOut(seg(t,3.0,4.0));
+    const c=cells[1];
+    c.r.setAttribute("transform",`translate(0 ${(-9*bl).toFixed(1)}) scale(1,${(1+0.09*bl).toFixed(3)})`);
+    c.r.setAttribute("transform-origin",`${c.x+c.w/2} ${c.y+c.h}`);
+    c.r.setAttribute("stroke",bl>0.15?"#E8D22A":"#3E6B82");
+    c.r.setAttribute("stroke-width",bl>0.15?3.2:2);
+
+    // 液滴
+    const dp=seg(t,3.6,4.4);
+    $("drops").setAttribute("opacity",(dp>0&&dp<1)?1:0);
+    const dy=110*eOut(dp);
+    $("d1").setAttribute("cy",596+dy);$("d1").setAttribute("opacity",1-dp);
+    $("d2").setAttribute("cy",586+dy*1.12);$("d2").setAttribute("opacity",1-dp);
+
+    // 触底闪光
+    const fp=seg(t,4.35,4.95);
+    $("flash").setAttribute("r",(10+95*eOut(fp)).toFixed(1));
+    $("flash").setAttribute("opacity",(fp>0&&fp<1?(1-fp):0).toFixed(3));
+
+    // 漏电通路
+    const leakOn=eOut(seg(t,4.5,5.3));
+    $("leakPath").setAttribute("opacity",leakOn.toFixed(3));
+    $("leakFlow").setAttribute("stroke-dashoffset",(-(t*130)%45).toFixed(2));
+    $("chipLeak").setAttribute("opacity",eOut(seg(t,5.1,5.8)).toFixed(3));
+
+    const dashFade=1-seg(t,4.6,5.2);
+    $("dashP").setAttribute("opacity",(dashOn*dashFade).toFixed(3));
+    $("chipIns").setAttribute("opacity",(seg(t,2.55,2.95)*dashFade).toFixed(3));
+
+    $("c2").style.opacity=(seg(t,4.6,5.15)*(1-seg(t,6.0,6.5))).toFixed(3);
+
+    // 右侧
+    const dimL=Math.max(0, eOut(seg(t,6.15,6.95)) - eOut(seg(t,11.5,12.15)));
+    $("dimL").setAttribute("opacity",(0.5*dimL).toFixed(3));
+
+    const rIn=eOut(seg(t,6.1,7.0));
+    $("right").setAttribute("opacity",rIn.toFixed(3));
+    $("right").setAttribute("transform",`translate(${((1-rIn)*40).toFixed(1)} 0)`);
+    $("gauge").setAttribute("opacity",eOut(seg(t,6.5,7.3)).toFixed(3));
+    $("readout").setAttribute("opacity",eOut(seg(t,6.7,7.4)).toFixed(3));
+
+    const tap=eInOut(seg(t,6.8,7.6));
+    $("v0wire").setAttribute("stroke-dashoffset",(1-tap).toFixed(3));
+    $("v0chip").setAttribute("opacity",seg(t,7.35,7.75));
+    const pr=9+3.5*Math.abs(Math.sin(t*3.4))*seg(t,7.4,8.0);
+    $("v0dot").setAttribute("r",pr.toFixed(1));
+
+    $("c3").style.opacity=(seg(t,6.7,7.25)*(1-seg(t,8.6,9.1))).toFixed(3);
+
+    // R泄 接入
+    $("rLeak").setAttribute("opacity",eOut(seg(t,8.7,9.5)).toFixed(3));
+
+    // R1 等效变小
+    const sh=eInOut(seg(t,9.3,10.4));
+    const h1=lerp(100,54,sh), y1=286+(100-h1)/2;
+    $("r1box").setAttribute("height",h1.toFixed(1));
+    $("r1box").setAttribute("y",y1.toFixed(1));
+    $("r1box").setAttribute("stroke",sh>0.2?"#FF6A5E":"#8FB6CE");
+    $("r1a").textContent = (sh<0.6 ? "R1 300 kΩ" : "R1′ ≈ 35 kΩ");
+    $("r1a").setAttribute("fill", sh>0.2 ? "#FFB4AC" : "#C7DCE8");
+
+    // 指针
+    const sw=seg(t,9.5,11.0);
+    const over=Math.sin(clamp(sw)*Math.PI)*7*Math.exp(-3.2*sw);
+    const v=sw<=0?80:lerp(80,170,eOut(sw))+over;
+    setNeedle(v);
+    $("rdVal").textContent=v.toFixed(1)+" V";
+    $("rdVal").setAttribute("fill",sw>0.5?"#FFB020":"#FFFFFF");
+
+    $("c4").style.opacity=(seg(t,8.75,9.35)*(1-seg(t,11.9,12.3))).toFixed(3);
+
+    // 收尾
+    const veilP=eOut(seg(t,12.0,12.8));
+    $("veil").setAttribute("opacity",(0.93*veilP).toFixed(3));
+
+    const a1=eOut(seg(t,12.15,12.85));
+    $("bigA").setAttribute("opacity",a1.toFixed(3));
+    $("bigA").setAttribute("transform",`translate(0 ${((1-a1)*16).toFixed(1)})`);
+
+    const ar=eInOut(seg(t,12.5,13.1));
+    $("bigArrow").setAttribute("opacity",ar>0?1:0);
+    const w=86*ar;
+    $("arShaft").setAttribute("d",`M${960-w/2} 558 H${960+w/2}`);
+    $("arHead").setAttribute("d",`M${960+w/2} 558 l-17 -13 M${960+w/2} 558 l-17 13`);
+
+    const a2=eOut(seg(t,12.7,13.4));
+    $("bigB").setAttribute("opacity",a2.toFixed(3));
+    $("bigB").setAttribute("transform",`translate(0 ${((1-a2)*16).toFixed(1)})`);
+
+    $("bigC").setAttribute("opacity",eOut(seg(t,13.3,14.0)).toFixed(3));
+  };
+
+  window.__seek(0);
+  window.__ready=true;
+})();
+</script>
+
+<script>
+(function(){
+  // 每一步的“停靠点”（毫秒）与名字；第 0 步就是初始状态
+  const STEPS = [
+    [2100,  "电池包与母线"],
+    [3000,  "高阻不通"],
+    [3820,  "电解液渗漏"],
+    [5000,  "触底导通"],
+    [5400,  "R泄 通路"],
+    [7600,  "取 V0 = 80 V"],
+    [9200,  "R泄 并联"],
+    [10400, "R1 被抽小"],
+    [11200, "V0 偏到 170 V"],
+    [12600, "收尾大字"],
+    [14200, "结论落定"]
+  ];
+  const LAST  = STEPS.length - 1;
+  const TOTAL = STEPS[LAST][0];
+  const HOME  = STEPS[0][0];
+
+  const bPlay = document.getElementById('bPlay');
+  const bStep = document.getElementById('bStep');
+  const bPrev = document.getElementById('bPrev');
+  const bReset = document.getElementById('bReset');
+  const cnt   = document.getElementById('cnt');
+  const prog  = document.querySelector('#prog i');
+
+  let t = HOME, playing = false, raf = 0, tween = false, last = 0;
+
+  function curIdx(){
+    let idx = 0;
+    for (let k = 0; k < STEPS.length; k++) if (t >= STEPS[k][0] - 6) idx = k;
+    return idx;
+  }
+
+  function render(v){
+    t = Math.max(0, Math.min(TOTAL, v));
+    window.__seek(t);
+    const idx = curIdx();
+    cnt.innerHTML = '<b>' + String(idx).padStart(2,'0') + '</b>/' + LAST +
+                    '<i>· ' + STEPS[idx][1] + '</i>';
+    prog.style.width = (100 * (t - HOME) / (TOTAL - HOME)).toFixed(2) + '%';
+    const atHome = (t <= HOME + 1);
+    bPrev.disabled = atHome;
+    bReset.disabled = atHome;
+  }
+
+  function stopPlay(){
+    if (playing && raf) cancelAnimationFrame(raf);
+    raf = 0; playing = false;
+    bPlay.classList.remove('on');
+    bPlay.textContent = '▶ 一键播放';
+  }
+
+  function hardStop(){                    // 停掉播放与补间
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0; playing = false; tween = false;
+    bPlay.classList.remove('on');
+    bPlay.textContent = '▶ 一键播放';
+  }
+
+  function loop(now){
+    const dt = Math.min(64, now - last); last = now;
+    render(t + dt);
+    if (t >= TOTAL - 0.5){ render(TOTAL); stopPlay(); return; }
+    raf = requestAnimationFrame(loop);
+  }
+
+  function play(){
+    if (playing){ stopPlay(); return; }              // 再点一次 = 暂停
+    if (tween) hardStop();
+    if (t >= TOTAL - 1) render(HOME);                // 播完再点 = 从头
+    playing = true;
+    bPlay.classList.add('on');
+    bPlay.textContent = '❚❚ 暂停';
+    last = performance.now();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function goTo(target, speed){
+    hardStop();
+    const from = t;
+    if (Math.abs(target - from) < 2){ render(target); return; }
+    const dur = Math.min(950, Math.max(300, Math.abs(target - from) * (speed || 0.55)));
+    const t0 = performance.now();
+    tween = true;
+    (function anim(now){
+      const p = Math.min(1, (now - t0) / dur);
+      const e = p < 0.5 ? 2*p*p : -1 + (4 - 2*p) * p;
+      render(from + (target - from) * e);
+      if (p < 1){ raf = requestAnimationFrame(anim); }
+      else { tween = false; render(target); }
+    })(t0);
+  }
+
+  function step(){                                   // 下一步
+    if (playing) stopPlay();
+    if (tween) return;
+    const i = curIdx();
+    goTo(i >= LAST ? HOME : STEPS[i + 1][0], 0.55);
+  }
+
+  function prev(){                                   // 上一步
+    if (playing) stopPlay();
+    if (tween) return;
+    const i = curIdx();
+    goTo(i <= 0 ? HOME : STEPS[i - 1][0], 0.40);
+  }
+
+  function reset(){                                  // 一键复原
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0; playing = false; tween = false;
+    bPlay.classList.remove('on');
+    bPlay.textContent = '▶ 一键播放';
+    render(HOME);
+  }
+
+  bPlay.addEventListener('click', play);
+  bStep.addEventListener('click', step);
+  bPrev.addEventListener('click', prev);
+  bReset.addEventListener('click', reset);
+
+  document.addEventListener('keydown', function(e){
+    if (e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); play(); }
+    else if (e.code === 'ArrowRight' || e.code === 'PageDown' || e.key === 'n'){ e.preventDefault(); step(); }
+    else if (e.code === 'ArrowLeft' || e.code === 'PageUp' || e.key === 'p'){ e.preventDefault(); prev(); }
+    else if (e.key === 'r' || e.key === 'R' || e.code === 'Home'){ e.preventDefault(); reset(); }
+  });
+
+  // ---- 自适应缩放 ----
+  const stage = document.getElementById('stage');
+  function fit(){
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transformOrigin = '0 0';
+    stage.style.transform = 'scale(' + s + ')';
+    stage.style.left = ((innerWidth - 1920 * s) / 2) + 'px';
+    stage.style.top  = ((innerHeight - 1080 * s) / 2) + 'px';
+    stage.style.position = 'absolute';
+  }
+  addEventListener('resize', fit); fit();
+
+  render(HOME);
+  window.__uiReady = true;
+})();
+</script>
+</body>
+</html>
